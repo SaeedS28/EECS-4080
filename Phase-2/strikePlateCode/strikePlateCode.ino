@@ -12,18 +12,16 @@ void setup() {
 void loop() {
     int incomingByte;
         
-  if (HWSERIAL.available() > 0) {
+  while (HWSERIAL.available() > 0) {
     incomingByte = HWSERIAL.read();
     Serial.print("UART received: ");
     Serial.println(char(incomingByte));
-    digitalWrite(relay1, HIGH);
+    //digitalWrite(relay1, HIGH);
     digitalWrite(relay2, HIGH);
     Serial.print("UART received: ");
     delay(5000);
-    digitalWrite(relay1, LOW);
+    //digitalWrite(relay1, LOW);
     digitalWrite(relay2, LOW);
-   
-    
   }
  // delay(1000);
 }

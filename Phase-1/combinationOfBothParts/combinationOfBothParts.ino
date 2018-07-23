@@ -6,7 +6,7 @@ Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 int relay2=5; //port for the relay switch
 double tempInCelsius=0; //temperature variable
 #define HWSERIAL Serial1
-
+#define HWSERIAL2 Serial2
 
 void setup() {
   
