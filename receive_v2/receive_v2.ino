@@ -1,7 +1,7 @@
 #define HWSERIAL Serial1
 double incomingByte;
 int rede = 2;
-byte packet[] = {1,2,34,103,54};
+byte packet[] = {1,2,34,54};
 
 void setup() {
  Serial.begin(9600);
@@ -11,7 +11,7 @@ void setup() {
 
 void loop() {
    //digitalWrite(rede, LOW);
-   
+   /*
    if (HWSERIAL.available() > 0) {
      incomingByte = HWSERIAL.read();
      Serial.print("UART received: ");
@@ -20,8 +20,8 @@ void loop() {
         digitalWrite(rede, HIGH);
         Serial1.write("i got your letter   digitalWrite(rede, LOW); 
      }*/
-   }
-   else{
+   //}
+   //else{
    digitalWrite(rede, HIGH);
    delay(500);
     Serial1.write((uint8_t*)packet, sizeof(packet));
@@ -29,5 +29,5 @@ void loop() {
     delay(200);
     digitalWrite(rede, LOW);
     delay(500);
-   }
+   //}
 }

@@ -13,7 +13,7 @@ void setup() {
   Serial.begin(9600);
   pinMode(relay2, OUTPUT);
   Serial1.begin(9600);
-  Serial.println("Relay getting activated based on the temperature");  
+ // Serial.println("Relay getting activated based on the temperature");  
   mlx.begin();  
 }
 
@@ -22,6 +22,7 @@ void loop() {
   tempInCelsius=mlx.readObjectTempC();
   Serial.print("Temperature: ");Serial.print(tempInCelsius); Serial.println("*C");
   Serial.println();
+  delay(500);
   if(tempInCelsius>=26.00){
     Serial.println("Temperature: exceeded 26 *C\nTurning off the power\n");
     digitalWrite(relay2, HIGH);
@@ -36,5 +37,6 @@ void loop() {
   
   //Serial.println();
   delay(500);
-  
+
 }
+
