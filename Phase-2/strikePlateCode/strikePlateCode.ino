@@ -80,11 +80,6 @@ void setup() {
   //Serial1.begin(9600);
   Serial2.begin(9600);
   //HWSERIAL.begin(9600);
-  for (int i = 0; i < 32; i++)
-  {
-    //fetches the keys for decryption
-    encryptionKeys[i] = (char)(i + 200);
-  }
 }
 void loop() {
   //listenToSlave();
@@ -110,9 +105,6 @@ void loop() {
         
         ciphertext[0] = cipherKey-1;
         aesDecrypt(rk, nrounds, ciphertext, keyText);
-//       Serial.print("Decrypted Array: ");
-//        for(int i=0;i<16;i++)
-//          Serial.println(int(keyText[i]));
           if(keyText[0]==key){
             Serial.println("decrypted successfully. even though it fucking sucks");
           }

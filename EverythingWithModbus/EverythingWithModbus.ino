@@ -9,14 +9,23 @@ double tempInCelsius=0; //temperature variable
 #define HWSERIAL Serial1
 #define HWSERIAL Serial2
 
+static int listening = 0;   //not sure about this one
+unsigned char ciphertext[16] = {254, 21, 174, 42, 40, 26, 100, 56, 90, 119, 129, 134, 18, 165, 165, 100};
+unsigned char keyText[16];
+unsigned char plaintext[16];
+
+int reportDoor=0;
 static int flick = 0;
 byte packet[] = {0,0,0,0};
 int slaveID;
+int sID;
 int functionID;
+int fID;
 int crc;
 int rede = 2;
 int message;
-
+int cipherKey;
+int nrounds;
 
 void setup() {
   Serial.begin(9600);
@@ -28,24 +37,66 @@ void setup() {
   mlx.begin();  
 }
 
+void listenToSlave() {
+  static int field = 0;
+  if (Serial2.available() > 0) {
+    if (field == 0) {
+      sID = int(Serial2.read());
+      Serial.print("Slave ID: ");
+      Serial.println(slaveID);
+      field++;
+      listening = 1;
+    }
+    else if (field == 1) {
+      fID = int(Serial2.read());
+      Serial.print("Function ID: ");
+      Serial.println(fID);
+      field++;
+      listening = 1;
+    }
+    else if (field == 2) {
+      cipherKey = int(Serial2.read());
+      Serial.print("CipherKey: ");
+      Serial.println(cipherKey);
+      field++;
+      listening = 1;
+    }
+    else if (field == 3) {
+      nrounds = int(Serial2.read());
+      Serial.print("Number of rounds: ");
+      Serial.println(nrounds);
+      field = 0;
+      listening = 0;
+      reportDoor=1;   //packet received fully
+    }
+    else                    //flush the serial port
+    {
+      int t = Serial2.read();
+      delay(200);
+      field = 0;
+      listening = 0;
+    }
+  }
+  else                      //flush the serial port
+  {
+    int t = Serial2.read();
+    delay(200);
+    field = 0;
+  }
+}
+
 void reportDoorEntry(){
-  int incomingByte;
-    if (Serial2.available() > 0) {
-      incomingByte=Serial2.read();
-      if(char(incomingByte) == 'E'){
-        writeToMaster(96,20);
-        digitalWrite(relay2, HIGH);
-        //digitalWrite(relay1, HIGH);
-        Serial.print("UART received: ");
-        //Serial.println(incomingByte);
-        delay(5000);
-        //digitalWrite(relay1, LOW);
-        digitalWrite(relay2, LOW);
-      }
-      else{
-        int t = Serial2.read();       //flush the serial 2 port
-        incomingByte = 0;
-      }
+  if (sID == 2) {
+      Serial.println("Slave ID is 2");
+      if (fID == 10) {
+        //decryption time boys
+        Serial.println("Reached");      
+//        ciphertext[0] = cipherKey-1;
+//        aesDecrypt(rk, nrounds, ciphertext, keyText);
+//          if(keyText[0]==key){
+//            Serial.println("decrypted successfully. even though it fucking sucks");
+//          }
+      } 
   }
 }
 
@@ -95,7 +146,11 @@ void writeToMaster(double message, int functionID) {
 void loop() {
   reportTemperature(); 
   delay(100);
-  reportDoorEntry();
+  listenToSlave();
   delay(100);
-
+  if(reportDoor==1){
+    reportDoorEntry();
+    reportDoor=0;
+  }
+  delay(100);
 }
