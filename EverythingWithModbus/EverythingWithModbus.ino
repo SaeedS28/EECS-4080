@@ -46,29 +46,29 @@ void listenToSlave() {
   if (Serial2.available() > 0) {
     if (field == 0) {
       sID = int(Serial2.read());
-      Serial.print("Slave ID: ");
-      Serial.println(slaveID);
+//      Serial.print("Slave ID: ");
+//      Serial.println(sID);
       field++;
       listening = 1;
     }
     else if (field == 1) {
       fID = int(Serial2.read());
-      Serial.print("Function ID: ");
-      Serial.println(fID);
+//      Serial.print("Function ID: ");
+//      Serial.println(fID);
       field++;
       listening = 1;
     }
     else if (field == 2) {
       cipherKey = int(Serial2.read());
-      Serial.print("CipherKey: ");
-      Serial.println(cipherKey);
+//      Serial.print("CipherKey: ");
+//      Serial.println(cipherKey);
       field++;
       listening = 1;
     }
     else if (field == 3) {
       nrounds = int(Serial2.read());
-      Serial.print("Number of rounds: ");
-      Serial.println(nrounds);
+//      Serial.print("Number of rounds: ");
+//      Serial.println(nrounds);
       field = 0;
       listening = 0;
       reportDoor = 1; //packet received fully
@@ -91,21 +91,39 @@ void listenToSlave() {
 
 void reportDoorEntry() {
   if (sID == 2) {
-    Serial.println("Slave ID is 2");
+    //Serial.println("Slave ID is 2");
     if (fID == 10) {
-      //decryption time boys
-      Serial.println("Reached");
       ciphertext[0] = cipherKey - 1;
       aesDecrypt(rk, nrounds, ciphertext, keyText);
       if (keyText[0] == key) {
-        Serial.println("decrypted successfully. even though it fucking sucks");
+        Serial.println("Decrypted successfully. Enter through the door");
         writeToMaster(96, 20);
         digitalWrite(relay2, HIGH);
         delay(5000);
         digitalWrite(relay2, LOW);
+        clearPacket();
+
+//        Serial.print("SID");
+//        Serial.println(sID);
+//        Serial.print("FID:");
+//        Serial.println(fID);
+//        Serial.print("cypher: ");
+//        Serial.println(cipherKey);
+//        Serial.print("rounds: ");
+//        Serial.println(nrounds);
+//        Serial.print("ciphertext array");
+//        Serial.println(ciphertext[0]);
       }
     }
   }
+}
+
+void clearPacket() {
+  sID = 0;
+  fID = 0;
+  cipherKey = 0;
+  nrounds = 0;
+  ciphertext[0]=0;
 }
 
 void reportTemperature() {
@@ -153,7 +171,6 @@ void writeToMaster(double message, int functionID) {
 
 void loop() {
   reportTemperature();
-  //delay(100);
   listenToSlave();
   delay(100);
   if (reportDoor == 1) {
