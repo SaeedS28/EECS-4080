@@ -101,6 +101,13 @@ void loop() {
         for(int i=0;i<16;i++)
           Serial.println(ciphertext[i]);
       }
+      Serial.println();
+      //Decryption
+      aesDecrypt(rk, nrounds, ciphertext, keyText);
+
+      for(int i=0;i<16;i++)
+          Serial.println(keyText[i]);
+      
       clearPacket();
     }
     delay(100);
