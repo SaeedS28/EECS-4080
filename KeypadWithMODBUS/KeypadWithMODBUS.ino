@@ -36,18 +36,15 @@ void guessPassword() {
   Serial.print("\nGuessing password... ");
   if (password.evaluate())
   {
-//    digitalWrite(ledPin, HIGH);
-//    delay(500);
-//    digitalWrite(ledPin, LOW);
     digitalWrite(rede, HIGH);
     delay(500);
-    Serial1.write(69);
+    Serial1.write(69);  //I'm supposed to receive a 69 not 93
     delay(200);
     digitalWrite(rede, LOW);
     delay(500);
 
     Serial.println("Valid PIN ");
-    Serial.println("");//
+    Serial.println("");
     password.reset();
   }
   else {
@@ -100,9 +97,10 @@ void keypadEvent(KeypadEvent eKey) {
       // the encryption code
       //unsigned long rk[RKLENGTH(KEYBITS)];
       int nrounds = aesSetupEncrypt(rk, encryptionKeys, KEYBITS);
+      
       aesEncrypt(rk, nrounds, plaintext, ciphertext);
-      
-      
+      //you need to provide me with nrounds from the encryption algorithm
+      //I'm seeing exactly where you pass the plaintext
         printHex(ciphertext[0], 1);
         
         Serial.print("\n");

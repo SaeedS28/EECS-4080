@@ -5,9 +5,9 @@
 #define HWSERIAL2 Serial2
 unsigned long rk[RKLENGTH(KEYBITS)]; //for decryption
 
-static int field = 0;
-int garbage1;
-int garbage2;
+//static int field = 0;
+int slaveID;
+int functionID;
 int cipherKey;
 int nrounds;
 //int crc;
@@ -20,16 +20,16 @@ void listenToSlave() {
   static int field = 0;
   if (Serial2.available() > 0) {
     if (field == 0) {
-      garbage1 = int(Serial2.read());
-      Serial.print("Garbage 1: ");
-      Serial.println(garbage1);
+      slaveID = int(Serial2.read());
+      Serial.print("Slave ID: ");
+      Serial.println(slaveID);
       field++;
       listening = 1;
     }
     else if (field == 1) {
-      garbage2= int(Serial2.read());
-      Serial.print("Garbage 2: ");
-      Serial.println(garbage2);
+      functionID = int(Serial2.read());
+      Serial.print("Function ID: ");
+      Serial.println(functionID);
       field++;
       listening = 1;
     }

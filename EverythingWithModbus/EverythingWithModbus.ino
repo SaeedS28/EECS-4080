@@ -29,7 +29,7 @@ void setup() {
 }
 
 void reportDoorEntry(){
-  char incomingByte;
+  int incomingByte;
     if (Serial2.available() > 0) {
       incomingByte=Serial2.read();
       if(char(incomingByte) == 'E'){
@@ -37,7 +37,7 @@ void reportDoorEntry(){
         digitalWrite(relay2, HIGH);
         //digitalWrite(relay1, HIGH);
         Serial.print("UART received: ");
-        Serial.println(incomingByte);
+        //Serial.println(incomingByte);
         delay(5000);
         //digitalWrite(relay1, LOW);
         digitalWrite(relay2, LOW);
@@ -54,7 +54,7 @@ void reportTemperature(){
   Serial.print("Temperature: ");Serial.print(tempInCelsius); Serial.println("*C");
   Serial.println();
   delay(500);
-  if(tempInCelsius>=30.00){
+  if(tempInCelsius>=27.00){
     Serial.println("Temperature: exceeded 27 *C\nTurning off the power\n");
     digitalWrite(relay1, HIGH);
     Serial1.write(static_cast<byte>(tempInCelsius));
@@ -66,7 +66,7 @@ void reportTemperature(){
       flick = 1;
     }
     
-    while(mlx.readObjectTempC()>=30.00){}
+    while(mlx.readObjectTempC()>=27.00){}
     digitalWrite(relay1, LOW);
     Serial.println("Power back on");
     delay(500);
