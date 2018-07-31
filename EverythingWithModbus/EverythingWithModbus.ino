@@ -1,22 +1,26 @@
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
-
+#include "Arduino.h"
+#include <AES.h>
+#define KEYBITS 256
+unsigned long rk[RKLENGTH(KEYBITS)]; //for decryption
 Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 
-int relay2=5; //port for the relay switch
-int relay1=6;
-double tempInCelsius=0; //temperature variable
+int relay2 = 5; //port for the relay switch
+int relay1 = 6;
+double tempInCelsius = 0; //temperature variable
 #define HWSERIAL Serial1
 #define HWSERIAL Serial2
 
+int key = 218;
 static int listening = 0;   //not sure about this one
 unsigned char ciphertext[16] = {254, 21, 174, 42, 40, 26, 100, 56, 90, 119, 129, 134, 18, 165, 165, 100};
 unsigned char keyText[16];
 unsigned char plaintext[16];
 
-int reportDoor=0;
+int reportDoor = 0;
 static int flick = 0;
-byte packet[] = {0,0,0,0};
+byte packet[] = {0, 0, 0, 0};
 int slaveID;
 int sID;
 int functionID;
@@ -30,11 +34,11 @@ int nrounds;
 void setup() {
   Serial.begin(9600);
   pinMode(relay2, OUTPUT);
-  pinMode(relay1,OUTPUT);
+  pinMode(relay1, OUTPUT);
   Serial1.begin(9600);
   Serial2.begin(9600);
-  Serial.println("Relay getting activated based on the temperature");  
-  mlx.begin();  
+  Serial.println("Relay getting activated based on the temperature");
+  mlx.begin();
 }
 
 void listenToSlave() {
@@ -67,7 +71,7 @@ void listenToSlave() {
       Serial.println(nrounds);
       field = 0;
       listening = 0;
-      reportDoor=1;   //packet received fully
+      reportDoor = 1; //packet received fully
     }
     else                    //flush the serial port
     {
@@ -85,45 +89,49 @@ void listenToSlave() {
   }
 }
 
-void reportDoorEntry(){
+void reportDoorEntry() {
   if (sID == 2) {
-      Serial.println("Slave ID is 2");
-      if (fID == 10) {
-        //decryption time boys
-        Serial.println("Reached");      
-//        ciphertext[0] = cipherKey-1;
-//        aesDecrypt(rk, nrounds, ciphertext, keyText);
-//          if(keyText[0]==key){
-//            Serial.println("decrypted successfully. even though it fucking sucks");
-//          }
-      } 
+    Serial.println("Slave ID is 2");
+    if (fID == 10) {
+      //decryption time boys
+      Serial.println("Reached");
+      ciphertext[0] = cipherKey - 1;
+      aesDecrypt(rk, nrounds, ciphertext, keyText);
+      if (keyText[0] == key) {
+        Serial.println("decrypted successfully. even though it fucking sucks");
+        writeToMaster(96, 20);
+        digitalWrite(relay2, HIGH);
+        delay(5000);
+        digitalWrite(relay2, LOW);
+      }
+    }
   }
 }
 
-void reportTemperature(){
-  tempInCelsius=mlx.readObjectTempC();
-  Serial.print("Temperature: ");Serial.print(tempInCelsius); Serial.println("*C");
+void reportTemperature() {
+  tempInCelsius = mlx.readObjectTempC();
+  Serial.print("Temperature: "); Serial.print(tempInCelsius); Serial.println("*C");
   Serial.println();
   delay(500);
-  if(tempInCelsius>=27.00){
+  if (tempInCelsius >= 27.00) {
     Serial.println("Temperature: exceeded 27 *C\nTurning off the power\n");
     digitalWrite(relay1, HIGH);
     Serial1.write(static_cast<byte>(tempInCelsius));
     //delay(5000); //Five second delay for the first time detection.
 
     //code to send to slave Andres the change in temperature
-    if(flick == 0){
-      writeToMaster(tempInCelsius,10);
+    if (flick == 0) {
+      writeToMaster(tempInCelsius, 10);
       flick = 1;
     }
-    
-    while(mlx.readObjectTempC()>=27.00){}
+
+    while (mlx.readObjectTempC() >= 27.00) {}
     digitalWrite(relay1, LOW);
     Serial.println("Power back on");
     delay(500);
   }
-  else{
-    if(flick == 1){
+  else {
+    if (flick == 1) {
       writeToMaster(tempInCelsius, 10);
       flick = 0;
     }
@@ -144,13 +152,13 @@ void writeToMaster(double message, int functionID) {
 }
 
 void loop() {
-  reportTemperature(); 
-  delay(100);
+  reportTemperature();
+  //delay(100);
   listenToSlave();
   delay(100);
-  if(reportDoor==1){
+  if (reportDoor == 1) {
     reportDoorEntry();
-    reportDoor=0;
+    reportDoor = 0;
   }
   delay(100);
 }
