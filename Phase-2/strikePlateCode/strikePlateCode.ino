@@ -15,6 +15,12 @@ int rede = 2;
 //int message;
 
 static int listening = 0;   //not sure about this one
+void clearPacket(){
+  slaveID=0;
+  functionID=0;
+  cipherKey=0;
+  nrounds=0;  
+}
 
 void listenToSlave() {
   static int field = 0;
@@ -83,6 +89,24 @@ void loop() {
   //      //digitalWrite(relay1, LOW);
   //      digitalWrite(relay2, LOW);
   //  }
+
+  //Listens to device
   listenToSlave();
+  if(listening==0){
+    //check to see if the packet received is good
+    if(slaveID==2){
+      Serial.println("Slave ID is 2");
+      if(functionID==10){
+        Serial.println("Function ID is 1\n");
+
+        clearPacket();
+        Serial.println("After clearing");
+        Serial.println(slaveID);
+        Serial.println(functionID);
+      }
+    }
+  }
   delay(100);
+
+  //decryption
 }
