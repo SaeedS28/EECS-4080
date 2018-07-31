@@ -5,8 +5,9 @@
 #define HWSERIAL2 Serial2
 unsigned long rk[RKLENGTH(KEYBITS)]; //for decryption
 
-unsigned char ciphertext[16] = {76, 21, 174, 42, 40, 26, 100, 56, 90, 119, 129, 134, 18, 165, 165, 100};
-unsigned char keyText[16] = {14, 111, 109, 101, 32, 80, 108, 97, 105, 110, 32, 84, 101, 120, 116, 33};
+int key=218;
+unsigned char ciphertext[16] = {254, 21, 174, 42, 40, 26, 100, 56, 90, 119, 129, 134, 18, 165, 165, 100};
+unsigned char keyText[16]; //= {14, 111, 109, 101, 32, 80, 108, 97, 105, 110, 32, 84, 101, 120, 116, 33};
 unsigned char plaintext[16];
 //static int field = 0;
 int slaveID;
@@ -106,17 +107,17 @@ void loop() {
       Serial.println("Slave ID is 2");
       if (functionID == 10) {
         //decryption time boys
-        //        int nroundsReverse = aesSetupDecrypt(rk, encryptionKeys, KEYBITS);
-        //        Serial.print("Value of reverse rounds: ");
-        //        Serial.println(nroundsReverse); //this better not be fucking 14
-        //ciphertext[0] = cipherKey;
-
-        aesDecrypt(rk, nrounds, ciphertext, plaintext);
-        Serial.print("Decrypted Array: ");
-        for (int i = 0; i < 16; i++) {
-          Serial.println(keyText[i]);
-        }
+        
+        ciphertext[0] = cipherKey-1;
+        aesDecrypt(rk, nrounds, ciphertext, keyText);
+//       Serial.print("Decrypted Array: ");
+//        for(int i=0;i<16;i++)
+//          Serial.println(int(keyText[i]));
+          if(keyText[0]==key){
+            Serial.println("decrypted successfully. even though it fucking sucks");
+          }
       }
+
       clearPacket();
     }
     delay(100);
